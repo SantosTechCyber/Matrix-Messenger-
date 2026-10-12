@@ -7,8 +7,8 @@
 <title>Our chat</title>
 <style>
   :root {
-    --bg: #05070d;
-    --panel: #0d1424;
+    --bg: #000000;
+    --panel: #0a0a0a;
     --panel-2: #111b2f;
     --line: #1e2a44;
     --text: #e6edf8;
@@ -16,6 +16,10 @@
     --blue: #2563eb;
     --blue-2: #3b82f6;
     --blue-glow: rgba(59, 130, 246, 0.25);
+    --green: #22c55e;
+    --green-dark: #15803d;
+    --green-line: #14532d;
+    --green-glow: rgba(34, 197, 94, 0.22);
     --err: #f87171;
   }
   * { box-sizing: border-box; }
@@ -24,29 +28,49 @@
     margin: 0;
     font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
     color: var(--text);
-    background: radial-gradient(circle at top, #0c1a3a 0%, var(--bg) 55%) fixed, var(--bg);
+    background: var(--bg);
     display: flex;
     flex-direction: column;
   }
 
-  /* Welcome card */
+  .is-hidden { display: none !important; }
+
+  /* Welcome card (black and green) */
   .setup {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
     width: calc(100% - 32px);
     max-width: 380px;
     margin: auto;
     padding: 28px 24px;
     background: var(--panel);
-    border: 1px solid var(--line);
+    border: 1px solid var(--green-line);
     border-radius: 18px;
-    box-shadow: 0 0 40px var(--blue-glow);
+    box-shadow: 0 0 40px var(--green-glow);
   }
-  .setup .hello { font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--blue-2); margin: 0 0 6px; }
-  .setup h2 { margin: 0 0 6px; font-size: 24px; font-weight: 600; }
+  .setup > * { width: 100%; }
+  .setup .hello { font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--green); margin: 0 0 6px; }
+  .setup h2 { margin: 0 0 6px; font-size: 24px; font-weight: 600; color: var(--text); }
   .setup .lead { margin: 0 0 20px; color: var(--muted); font-size: 14px; line-height: 1.5; }
-  .setup input { width: 100%; margin-bottom: 12px; }
-  .setup button { width: 100%; margin-top: 4px; padding: 13px; font-size: 16px; }
+  .setup input {
+    display: block;
+    margin-bottom: 12px;
+    background: #050505;
+    border: 1px solid var(--green-line);
+  }
+  .setup input:focus { border-color: var(--green); box-shadow: 0 0 0 3px var(--green-glow); }
+  .setup button {
+    display: block;
+    margin-top: 4px;
+    padding: 13px;
+    font-size: 16px;
+    background: linear-gradient(135deg, var(--green), var(--green-dark));
+    color: #04130a;
+    font-weight: 600;
+  }
 
-  /* Inputs and buttons */
+  /* Shared inputs and buttons (blue, used in chat) */
   input {
     flex: 1;
     min-width: 0;
@@ -75,6 +99,7 @@
   }
   button:hover { filter: brightness(1.1); }
   button:active { transform: scale(0.98); }
+  button:disabled { opacity: 0.5; cursor: default; }
   .small {
     padding: 7px 12px;
     font-size: 12px;
@@ -82,14 +107,31 @@
     color: var(--blue-2);
     border: 1px solid var(--line);
   }
+  .attach {
+    width: 46px;
+    height: 46px;
+    padding: 0;
+    border-radius: 50%;
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    color: var(--blue-2);
+    font-size: 24px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
 
   #err { color: var(--err); font-size: 14px; min-height: 18px; margin: 10px 0 0; text-align: center; }
+  #status { color: var(--muted); font-size: 13px; text-align: center; padding: 0 0 6px; min-height: 0; }
 
-  /* Chat screen */
+  /* Chat screen (blue) */
   #chat {
+    display: flex;
     flex: 1;
     min-height: 0;
-    display: flex;
     flex-direction: column;
     max-width: 720px;
     width: 100%;
@@ -106,7 +148,6 @@
     gap: 8px;
     background: rgba(5, 7, 13, 0.85);
     border-bottom: 1px solid var(--line);
-    backdrop-filter: blur(8px);
   }
   header .title { font-weight: 600; font-size: 17px; }
   header .title span { display: block; font-size: 12px; font-weight: 400; color: var(--muted); margin-top: 2px; }
@@ -143,9 +184,12 @@
   }
   .who { font-size: 11px; color: var(--blue-2); margin-bottom: 3px; font-weight: 500; }
   .b.mine .who { color: #bfdbfe; text-align: right; }
+  .media { display: block; max-width: 100%; max-height: 320px; border-radius: 12px; margin-top: 6px; }
+  .body { margin-top: 4px; white-space: pre-wrap; }
 
   form {
     display: flex;
+    align-items: center;
     gap: 10px;
     padding: 14px;
     background: rgba(5, 7, 13, 0.85);
@@ -157,7 +201,7 @@
 </head>
 <body>
 
-<div class="setup hidden" id="setup" style="display:none">
+<div class="setup is-hidden" id="setup">
   <p class="hello">Hey there</p>
   <h2>Welcome in</h2>
   <p class="lead">A private space for just the two of you. Enter your name and your four secret words to meet here.</p>
@@ -167,15 +211,20 @@
   <p id="err"></p>
 </div>
 
-<div id="chat" class="hidden" style="display:none">
+<div id="chat" class="is-hidden">
   <header>
     <div class="title">Our chat<span>Just the two of you</span></div>
     <button class="small" onclick="localStorage.clear(); location.reload()">Switch</button>
   </header>
   <div id="msgs"></div>
+  <div id="status"></div>
   <form onsubmit="send(event)">
+    <label class="attach" title="Send a photo or video" aria-label="Send a photo or video">
+      +
+      <input id="file" type="file" accept="image/*,video/*" hidden>
+    </label>
     <input id="text" placeholder="Write something sweet" autocomplete="off">
-    <button>Send</button>
+    <button id="sendBtn">Send</button>
   </form>
 </div>
 
@@ -183,6 +232,7 @@
 <script>
   const SUPABASE_URL = "https://wixoozjehdypfrhcbpgm.supabase.co";
   const SUPABASE_KEY = "sb_publishable_cUL2LwPX1EpyU930JRxZPA_sZzkOceC";
+  const MAX_MEDIA_BYTES = 25 * 1024 * 1024;
 
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -190,8 +240,8 @@
   let roomCode = localStorage.getItem('room') || '';
   let messages = [];
 
-  function show(id) { document.getElementById(id).style.display = 'flex'; }
-  function hide(id) { document.getElementById(id).style.display = 'none'; }
+  function show(id) { document.getElementById(id).classList.remove('is-hidden'); }
+  function hide(id) { document.getElementById(id).classList.add('is-hidden'); }
 
   function join() {
     const name = document.getElementById('name').value.trim();
@@ -225,7 +275,7 @@
     messages = data || [];
     renderAll();
 
-    // Live updates: new messages appear on both phones as they're sent
+    // Live updates: new messages (text or media) appear on both phones
     sb.channel('room-' + roomCode)
       .on('postgres_changes', {
         event: 'INSERT', schema: 'public', table: 'messages', filter: 'room=eq.' + roomCode
@@ -242,19 +292,50 @@
     if (messages.length === 0) {
       const empty = document.createElement('div');
       empty.className = 'empty';
-      empty.innerHTML = '<b>Nothing here yet</b>Say hello and start your conversation.';
+      empty.innerHTML = '<b>Nothing here yet</b>Say hello or share a photo.';
       box.appendChild(empty);
       return;
     }
     messages.forEach(m => {
-      const d = document.createElement('div');
-      d.className = 'b' + (m.name === me ? ' mine' : '');
+      const wrap = document.createElement('div');
+      wrap.className = 'b' + (m.name === me ? ' mine' : '');
+
       const who = document.createElement('div');
       who.className = 'who';
       who.textContent = m.name;
-      d.appendChild(who);
-      d.appendChild(document.createTextNode(m.body));
-      box.appendChild(d);
+      wrap.appendChild(who);
+
+      if (m.media_url) {
+        if (m.media_type === 'video') {
+          const v = document.createElement('video');
+          v.className = 'media';
+          v.controls = true;
+          v.playsInline = true;
+          v.preload = 'metadata';
+          v.src = m.media_url;
+          wrap.appendChild(v);
+        } else {
+          const a = document.createElement('a');
+          a.href = m.media_url;
+          a.target = '_blank';
+          a.rel = 'noopener';
+          const img = document.createElement('img');
+          img.className = 'media';
+          img.loading = 'lazy';
+          img.src = m.media_url;
+          img.alt = 'Photo';
+          a.appendChild(img);
+          wrap.appendChild(a);
+        }
+      }
+
+      if (m.body) {
+        const t = document.createElement('div');
+        t.className = 'body';
+        t.textContent = m.body;
+        wrap.appendChild(t);
+      }
+      box.appendChild(wrap);
     });
     box.scrollTop = box.scrollHeight;
   }
@@ -269,6 +350,48 @@
     if (error) showError('Message not sent: ' + error.message);
   }
 
+  // Photo and video sharing
+  document.getElementById('file').addEventListener('change', async e => {
+    const file = e.target.files[0];
+    e.target.value = '';
+    if (!file) return;
+
+    if (file.size > MAX_MEDIA_BYTES) {
+      showError('That file is too large. The limit is 25 MB.');
+      return;
+    }
+    const isVideo = file.type.startsWith('video/');
+    const ext = (file.name.split('.').pop() || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const path = crypto.randomUUID() + (ext ? '.' + ext : '');
+
+    setBusy(true, isVideo ? 'Uploading video...' : 'Uploading photo...');
+    try {
+      const { error: upErr } = await sb.storage.from('chat-media').upload(path, file, {
+        contentType: file.type, upsert: false
+      });
+      if (upErr) throw upErr;
+
+      const { data } = sb.storage.from('chat-media').getPublicUrl(path);
+      const { error: insErr } = await sb.from('messages').insert({
+        room: roomCode,
+        name: me,
+        body: '',
+        media_url: data.publicUrl,
+        media_type: isVideo ? 'video' : 'image'
+      });
+      if (insErr) throw insErr;
+    } catch (err) {
+      showError('Upload failed: ' + err.message);
+    } finally {
+      setBusy(false, '');
+    }
+  });
+
+  function setBusy(busy, text) {
+    document.getElementById('sendBtn').disabled = busy;
+    document.getElementById('status').textContent = text;
+  }
+
   function showError(text) {
     document.getElementById('err').textContent = text;
   }
@@ -276,4 +399,4 @@
   if (me && roomCode) start(); else show('setup');
 </script>
 </body>
-  </html>
+      </html>
